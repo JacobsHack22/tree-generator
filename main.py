@@ -12,7 +12,7 @@ STRAIGHT_ANGLES = (75, 85)  # Угол поворота для продолже�
 BRANCH_ANGLES = (30, 60)  # Угол поворота для разветвления
  
 H = 128  # Размеры картинки
-REAL_IMAGE_COEF = 3
+REAL_IMAGE_COEF = 1
 REAL_IMAGE_SIZE = H * REAL_IMAGE_COEF
 C = 5  # Паддинг
  
@@ -303,14 +303,20 @@ def get_dist():
         if max_depth[i] == 0 or is_leaves[i]:
             queue.append((v[0], v[1]))
             dists[v[0]][v[1]] = 0
-    dobavka = ss.norm(50, 40).rvs(H * H) # 128: (50, 40), 64: (25, 20)
+    if H == 128:
+        dobavka = ss.norm(50, 40).rvs(H * H) # 128: (50, 40), 64: (25, 20)
+    else:
+        dobavka = ss.norm(4, 4).rvs(H * H) # 128: (50, 40), 64: (25, 20)
     for i in range(H):
         for j in range(H):
             for v in queue:
                 ln = math.sqrt((i - v[0]) ** 2 + (j - v[1]) ** 2 / (dist_coef ** 2)) # Def: 1.75
                 fun = abs(H - v[0]) * int(ln)
                 dists[i][j] = min(dists[i][j], fun)
-            dists[i][j] -= min(max(0, dobavka[i * H + j]), 80) # 128: 80, 64: 40
+            if H == 128:
+                dists[i][j] -= min(max(0, dobavka[i * H + j]), 80) # 128: 80, 64: 40
+            else:
+                dists[i][j] -= min(max(0, dobavka[i * H + j]), 13) # 128: 80, 64: 40
  
 pixel_colors = [[(-1, -1, -1) for i in range(H)] for j in range(H)]
 def color_pixels():
@@ -454,9 +460,14 @@ def draw_leaves(cr: cairo.Context, is_birch=False):
     cr.set_antialias(cairo.ANTIALIAS_NONE)
     
     delta = H * (REAL_IMAGE_COEF // 2)
-    M = (delta + H // 2, delta + H - 5)
-    L = (delta + H // 2 - 15, delta + H + 2)
-    R = (delta + H // 2 + 15, delta + H + 2)
+    if H == 128:
+        M = (delta + H // 2, delta + H - 5)
+        L = (delta + H // 2 - 15, delta + H + 2)
+        R = (delta + H // 2 + 15, delta + H + 2)
+    elif H == 48:
+        M = (delta + H // 2, delta + H - 2)
+        L = (delta + H // 2 - 5, delta + H + 1)
+        R = (delta + H // 2 + 5, delta + H + 1)
     if not is_birch:
         cr.set_source_rgb(*trunk_dark)
         for key in range(len(new_edges)):
@@ -477,19 +488,16 @@ def draw_leaves(cr: cairo.Context, is_birch=False):
         cr.move_to(*L)
         cr.line_to(*R)
         cr.stroke()
-        # cr.arc(delta + H // 2,  delta + (H + 12), 18, 0, 2 * math.pi) 
-        # cr.fill()
  
     cr.set_source_rgb(*trunk_shade)
     for key in range(len(new_edges)):
         value = new_edges[key]
         for id in value:
-            cr.set_line_width(new_rads[id] - BORDER_SIZE)
+            cr.set_line_width(new_rads[id] - BORDER_SIZE )
             cr.move_to(delta + new_graph[key][1], delta + H - new_graph[key][0])
             cr.line_to(delta + new_graph[id][1], delta + H - new_graph[id][0])
             cr.stroke()
-        # cr.arc(delta + H // 2,  delta + (H + 12), 17, 0, 2 * math.pi) 
-        # cr.fill()
+        
         cr.set_line_width(4)
         cr.move_to(*M)
         cr.line_to(*L)
@@ -511,8 +519,7 @@ def draw_leaves(cr: cairo.Context, is_birch=False):
             cr.move_to(delta + new_graph[key][1] - shade_size / 2, delta + H - new_graph[key][0])
             cr.line_to(delta + new_graph[id][1] - shade_size / 2, delta + H - new_graph[id][0])
             cr.stroke()
-        # cr.arc(delta + H // 2,  delta + (H + 11), 15, 0, 2 * math.pi) 
-        # cr.fill()
+        
         cr.set_line_width(2)
         cr.move_to(*M)
         cr.line_to(*L)
@@ -685,7 +692,10 @@ def build_healthy_oak(is_gray = False):
         global bg_color
         bg_color = (0.6, 0.6, 0.6)
     leaves_prob = 0.7
-    HEIGHT_CONST = 750
+    if H == 128:
+        HEIGHT_CONST = 750
+    elif H == 48:
+        HEIGHT_CONST = 110
     MIN_DISTANCE_FOR_LEAVES = 2
     add_more_tree_structure()
  
@@ -696,7 +706,10 @@ def build_unhealthy_oak():
     leaf2 = (193/255, 154/255, 107/255)
     leaf1 = (205/255, 174/255, 136/255)
     leaves_prob = 0.5
-    HEIGHT_CONST = 400
+    if H == 128:
+        HEIGHT_CONST = 400
+    elif H == 48:
+        HEIGHT_CONST = 60
     MIN_DISTANCE_FOR_LEAVES = 3
     add_more_tree_structure()
  
@@ -719,7 +732,10 @@ def build_oak():
     BRANCH_ANGLES = (10, 50)
     
     global C
-    C = 25  # Паддинг
+    if H == 128:
+        C = 25 
+    elif H == 48:
+        C = 8
     
     global MAX_TREE_HEIGHT_COEF, MAX_TREE_HEIGHT
     MAX_TREE_HEIGHT_COEF = 0.7 
@@ -736,15 +752,24 @@ def build_oak():
     MAX_SYMMETRY_DIFF = 3
     
     global STARTING_LENGTH, LENGTH_COEF, cst, q
-    STARTING_LENGTH = 30  # Изначальная длина ствола дерева, def: w // 4
-    LENGTH_COEF = 10
+    if H == 128:
+        STARTING_LENGTH = 30  # Изначальная длина ствола дерева, def: w // 4
+        LENGTH_COEF = 10
+    elif H == 48:
+        STARTING_LENGTH = 10
+        LENGTH_COEF = 3
     cst = 0.4  # Коэффиент для коэффициента Больше => длиннее ветки
     q = 1 - LENGTH_COEF / (cst * (H - C))  # Коэффициент уменьшения длины ветви
     
     global STARTING_RADIUS, MINIMUM_TRUNK_RADIUS, MINIMUM_BRANCH_RADIUS, r_branch
-    STARTING_RADIUS = 20  # Изначальная толщина ствола, def: W // 10
-    MINIMUM_TRUNK_RADIUS = 7     # Минимальная толщина ствола 128: 5, 64: 3
-    MINIMUM_BRANCH_RADIUS = 4  # Минимальная толщина ветки 128: 3, 64: 1
+    if H == 128:
+        STARTING_RADIUS = 20  # Изначальная толщина ствола, def: W // 10
+        MINIMUM_TRUNK_RADIUS = 7     # Минимальная толщина ствола 128: 5, 64: 3
+        MINIMUM_BRANCH_RADIUS = 4  # Минимальная толщина ветки 128: 3, 64: 1
+    elif H == 48:
+        STARTING_RADIUS = 7
+        MINIMUM_TRUNK_RADIUS = 3
+        MINIMUM_BRANCH_RADIUS = 1
     r_branch = 1.25 * (STARTING_RADIUS - MINIMUM_TRUNK_RADIUS) / H  # Коэффициент радиуса ствола
 
     global bg_color
@@ -770,7 +795,10 @@ def build_oak():
     MAX_NUMBER_OF_INTER_VERTEXES = 2 # Максимальное количество вершин, на которые разбивается ветка
 
     global HEIGHT_CONST
-    HEIGHT_CONST = 400
+    if H == 128:
+        HEIGHT_CONST = 400
+    elif H == 48:
+        HEIGHT_CONST = 110
 
     global RADIUS_SCALE_L, RADIUS_SCALE_M, RADIUS_SCALE_R
     RADIUS_SCALE_L = 0.6
@@ -807,7 +835,10 @@ def build_healthy_birch():
     leaf2 = (220/255, 84/255, 35/255)
     leaf1 = (227/255, 118/255, 78/255)
     leaves_prob = 0.7
-    HEIGHT_CONST = 500
+    if H == 128:
+        HEIGHT_CONST = 500
+    elif H == 48:
+        HEIGHT_CONST = 90
     MIN_DISTANCE_FOR_LEAVES = 2
     add_more_tree_structure()
  
@@ -818,7 +849,10 @@ def build_unhealthy_birch():
     leaf2 = (131/255, 98/255, 53/255)
     leaf1 = (168/255, 145/255, 113/255)
     leaves_prob = 0.4
-    HEIGHT_CONST = 300
+    if H == 128:
+        HEIGHT_CONST = 300
+    elif H == 48:
+        HEIGHT_CONST = 50
     MIN_DISTANCE_FOR_LEAVES = 3
     add_more_tree_structure()
  
@@ -841,7 +875,10 @@ def build_birch():
     BRANCH_ANGLES = (30, 60)
     
     global C
-    C = 25  # Паддинг
+    if H == 128:
+        C = 25 
+    elif H == 48:
+        C = 9
     
     global MAX_TREE_HEIGHT_COEF, MAX_TREE_HEIGHT
     MAX_TREE_HEIGHT_COEF = 0.8 
@@ -858,15 +895,24 @@ def build_birch():
     MAX_SYMMETRY_DIFF = 3
     
     global STARTING_LENGTH, LENGTH_COEF, cst, q
-    STARTING_LENGTH = 30  # Изначальная длина ствола дерева, def: w // 4
-    LENGTH_COEF = 10
+    if H == 128:
+        STARTING_LENGTH = 30  # Изначальная длина ствола дерева, def: w // 4
+        LENGTH_COEF = 10
+    elif H == 48:
+        STARTING_LENGTH = 10
+        LENGTH_COEF = 3
     cst = 0.4  # Коэффиент для коэффициента Больше => длиннее ветки
     q = 1 - LENGTH_COEF / (cst * (H - C))  # Коэффициент уменьшения длины ветви
     
     global STARTING_RADIUS, MINIMUM_TRUNK_RADIUS, MINIMUM_BRANCH_RADIUS, r_branch
-    STARTING_RADIUS = 15  # Изначальная толщина ствола, def: W // 10
-    MINIMUM_TRUNK_RADIUS = 7     # Минимальная толщина ствола 128: 5, 64: 3
-    MINIMUM_BRANCH_RADIUS = 4  # Минимальная толщина ветки 128: 3, 64: 1
+    if H == 128:
+        STARTING_RADIUS = 15  # Изначальная толщина ствола, def: W // 10
+        MINIMUM_TRUNK_RADIUS = 7     # Минимальная толщина ствола 128: 5, 64: 3
+        MINIMUM_BRANCH_RADIUS = 4  # Минимальная толщина ветки 128: 3, 64: 1
+    elif H == 48:
+        STARTING_RADIUS = 5
+        MINIMUM_TRUNK_RADIUS = 3
+        MINIMUM_BRANCH_RADIUS = 1
     r_branch = 0.5 * (STARTING_RADIUS - MINIMUM_TRUNK_RADIUS) / H  # Коэффициент радиуса ствола
 
     global bg_color
@@ -892,7 +938,10 @@ def build_birch():
     MAX_NUMBER_OF_INTER_VERTEXES = 5 # Максимальное количество вершин, на которые разбивается ветка
 
     global HEIGHT_CONST
-    HEIGHT_CONST = 450
+    if H == 128:
+        HEIGHT_CONST = 500
+    elif H == 48:
+        HEIGHT_CONST = 100
 
     global RADIUS_SCALE_L, RADIUS_SCALE_M, RADIUS_SCALE_R
     RADIUS_SCALE_L = 0.8
@@ -934,4 +983,4 @@ def generate_tree(tree_name, file_name='tree.json'):
     with open(file_name, 'w') as f:
         f.write(json_images)
 
-generate_tree('oak')
+generate_tree('birch')
