@@ -292,7 +292,6 @@ def destruct_edge(y_start, x_start, y_end, x_end, rad_start, rad_end):
     return vertexes, radiuses
  
  
-smooth_min_coef = 0.0001
 dist_coef = 1
 dists = [[1e9 for i in range(H)] for j in range(H)] # Расстояния от точки до ближайшего листа
 def get_dist():
@@ -309,8 +308,8 @@ def get_dist():
         for j in range(H):
             for v in queue:
                 ln = math.sqrt((i - v[0]) ** 2 + (j - v[1]) ** 2 / (dist_coef ** 2)) # Def: 1.75
-                fun = (H - v[0]) * int(ln)
-                dists[i][j] = smooth_min(dists[i][j], fun, smooth_min_coef)
+                fun = abs(H - v[0]) * int(ln)
+                dists[i][j] = min(dists[i][j], fun)
             dists[i][j] -= min(max(0, dobavka[i * H + j]), 80) # 128: 80, 64: 40
  
 pixel_colors = [[(-1, -1, -1) for i in range(H)] for j in range(H)]
@@ -510,7 +509,7 @@ def build_healthy_maple():
     leaf3 = (129/255, 60/255, 64/ 255)
     leaf2 = (162/255, 75/255, 81/255)
     leaf1 = (189/255, 129/255, 133/255)
-    leaves_prob = 0.8
+    leaves_prob = 0.4
     HEIGHT_CONST = 750
     MIN_DISTANCE_FOR_LEAVES = 2
     add_more_tree_structure()
@@ -540,27 +539,27 @@ def build_dead_maple():
 
 def build_maple():
     global STOP_PROB, BRANCH_PROB, STRAIGHT_ANGLES, BRANCH_ANGLES
-    STOP_PROB = 0.3
-    BRANCH_PROB = 0.3
-    STRAIGHT_ANGLES = (75, 85)
-    BRANCH_ANGLES = (30, 60)
+    STOP_PROB = 0.8
+    BRANCH_PROB = 0.4
+    STRAIGHT_ANGLES = (60, 85)
+    BRANCH_ANGLES = (30, 55)
     
     global C
     C = 5  # Паддинг
     
     global MAX_TREE_HEIGHT_COEF, MAX_TREE_HEIGHT
-    MAX_TREE_HEIGHT_COEF = 0.6 
+    MAX_TREE_HEIGHT_COEF = 0.5 
     MAX_TREE_HEIGHT = (H - C) * MAX_TREE_HEIGHT_COEF
     
     global MIN_VERTEXES_NUMBER
-    MIN_VERTEXES_NUMBER = 30  # Минимальное количество вершин в дереве
+    MIN_VERTEXES_NUMBER = 20  # Минимальное количество вершин в дереве
     
     global MAX_NUMBER_OF_BRANCH, MAX_DEPTH_WITHOUT_BRANCH, MIN_TREE_HEIGHT_IN_VERTEXES, MAX_TREE_HEIGHT_IN_VERTEXES, MAX_SYMMETRY_DIFF
     MAX_NUMBER_OF_BRANCH = 4  # Максимальное количество ветвлений на одной ветке
-    MAX_DEPTH_WITHOUT_BRANCH = 1  # Cколько вершин можно пройти не наткнувся на ветку
+    MAX_DEPTH_WITHOUT_BRANCH = 4  # Cколько вершин можно пройти не наткнувся на ветку
     MIN_TREE_HEIGHT_IN_VERTEXES = 6 # Минимальная высота дерева в вершинах
     MAX_TREE_HEIGHT_IN_VERTEXES = 35 # Максимальная высота дерева в вершинах
-    MAX_SYMMETRY_DIFF = 5
+    MAX_SYMMETRY_DIFF = 3
     
     global STARTING_LENGTH, LENGTH_COEF, cst, q
     STARTING_LENGTH = 15  # Изначальная длина ствола дерева, def: w // 4
