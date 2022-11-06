@@ -596,11 +596,11 @@ def build_maple():
     C = 5  # Паддинг
     
     global MAX_TREE_HEIGHT_COEF, MAX_TREE_HEIGHT
-    MAX_TREE_HEIGHT_COEF = 0.5 
+    MAX_TREE_HEIGHT_COEF = 0.8 
     MAX_TREE_HEIGHT = (H - C) * MAX_TREE_HEIGHT_COEF
     
     global MIN_VERTEXES_NUMBER
-    MIN_VERTEXES_NUMBER = 20  # Минимальное количество вершин в дереве
+    MIN_VERTEXES_NUMBER = 24  # Минимальное количество вершин в дереве
     
     global MAX_NUMBER_OF_BRANCH, MAX_DEPTH_WITHOUT_BRANCH, MIN_TREE_HEIGHT_IN_VERTEXES, MAX_TREE_HEIGHT_IN_VERTEXES, MAX_SYMMETRY_DIFF
     MAX_NUMBER_OF_BRANCH = 4  # Максимальное количество ветвлений на одной ветке
@@ -983,4 +983,4 @@ def generate_tree(tree_name, file_name='tree.json'):
     with open(file_name, 'w') as f:
         f.write(json_images)
 
-generate_tree('birch')
+generate_tree('maple')
