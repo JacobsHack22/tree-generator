@@ -454,6 +454,9 @@ def draw_leaves(cr: cairo.Context, is_birch=False):
     cr.set_antialias(cairo.ANTIALIAS_NONE)
     
     delta = H * (REAL_IMAGE_COEF // 2)
+    M = (delta + H // 2, delta + H - 5)
+    L = (delta + H // 2 - 15, delta + H + 2)
+    R = (delta + H // 2 + 15, delta + H + 2)
     if not is_birch:
         cr.set_source_rgb(*trunk_dark)
         for key in range(len(new_edges)):
@@ -463,6 +466,19 @@ def draw_leaves(cr: cairo.Context, is_birch=False):
                 cr.move_to(delta + new_graph[key][1], delta + H - new_graph[key][0])
                 cr.line_to(delta + new_graph[id][1], delta + H - new_graph[id][0])
                 cr.stroke()
+        
+        cr.set_line_width(5)
+        cr.move_to(*M)
+        cr.line_to(*L)
+        cr.stroke()
+        cr.move_to(*M)
+        cr.line_to(*R)
+        cr.stroke()
+        cr.move_to(*L)
+        cr.line_to(*R)
+        cr.stroke()
+        # cr.arc(delta + H // 2,  delta + (H + 12), 18, 0, 2 * math.pi) 
+        # cr.fill()
  
     cr.set_source_rgb(*trunk_shade)
     for key in range(len(new_edges)):
@@ -472,6 +488,19 @@ def draw_leaves(cr: cairo.Context, is_birch=False):
             cr.move_to(delta + new_graph[key][1], delta + H - new_graph[key][0])
             cr.line_to(delta + new_graph[id][1], delta + H - new_graph[id][0])
             cr.stroke()
+        # cr.arc(delta + H // 2,  delta + (H + 12), 17, 0, 2 * math.pi) 
+        # cr.fill()
+        cr.set_line_width(4)
+        cr.move_to(*M)
+        cr.line_to(*L)
+        cr.stroke()
+        cr.move_to(*M)
+        cr.line_to(*R)
+        cr.stroke()
+        cr.move_to(*L)
+        cr.line_to(*R)
+        cr.stroke()
+
  
     cr.set_source_rgb(*trunk_light)
     for key in range(len(new_edges)):
@@ -482,6 +511,18 @@ def draw_leaves(cr: cairo.Context, is_birch=False):
             cr.move_to(delta + new_graph[key][1] - shade_size / 2, delta + H - new_graph[key][0])
             cr.line_to(delta + new_graph[id][1] - shade_size / 2, delta + H - new_graph[id][0])
             cr.stroke()
+        # cr.arc(delta + H // 2,  delta + (H + 11), 15, 0, 2 * math.pi) 
+        # cr.fill()
+        cr.set_line_width(2)
+        cr.move_to(*M)
+        cr.line_to(*L)
+        cr.stroke()
+        cr.move_to(*M)
+        cr.line_to(*R)
+        cr.stroke()
+        cr.move_to(*L)
+        cr.line_to(*R)
+        cr.stroke()
     
     if is_birch:
         cr.set_line_width(1)
@@ -893,4 +934,4 @@ def generate_tree(tree_name, file_name='tree.json'):
     with open(file_name, 'w') as f:
         f.write(json_images)
 
-generate_tree('maple')
+generate_tree('oak')
