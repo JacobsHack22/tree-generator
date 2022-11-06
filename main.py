@@ -452,9 +452,8 @@ def disp(draw_func, file_name, is_birch=False):
     return image
  
 def draw_leaves(cr: cairo.Context, is_birch=False):
-    cr.rectangle(0, 0, REAL_IMAGE_SIZE, REAL_IMAGE_SIZE)
-    cr.set_source_rgb(*bg_color)
-    cr.fill()
+    # cr.set_source_rgb(*bg_color)
+    # cr.fill()
  
     cr.set_line_cap(cairo.LINE_CAP_ROUND)
     cr.set_antialias(cairo.ANTIALIAS_NONE)
@@ -596,7 +595,7 @@ def build_maple():
     C = 5  # Паддинг
     
     global MAX_TREE_HEIGHT_COEF, MAX_TREE_HEIGHT
-    MAX_TREE_HEIGHT_COEF = 0.8 
+    MAX_TREE_HEIGHT_COEF = 0.7 
     MAX_TREE_HEIGHT = (H - C) * MAX_TREE_HEIGHT_COEF
     
     global MIN_VERTEXES_NUMBER
@@ -983,4 +982,4 @@ def generate_tree(tree_name, file_name='tree.json'):
     with open(file_name, 'w') as f:
         f.write(json_images)
 
-generate_tree('maple')
+generate_tree('oak')
